@@ -30,7 +30,7 @@ export const CTASection = () => {
                 </Button>
               </Link>
               <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">
-                <Button size="lg" variant="outline" className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 gap-2 text-base px-8 w-full sm:w-auto">
+                <Button size="lg" variant="outline" className="bg-transparent border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 text-base px-8">
                   <MessageCircle className="w-4 h-4" />
                   Chat on WhatsApp
                 </Button>
