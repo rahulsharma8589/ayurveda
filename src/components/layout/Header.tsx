@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Menu, X, ShoppingBag, Leaf } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Menu, X, ShoppingBag, Leaf, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const navLinks = [
@@ -13,7 +13,31 @@ const navLinks = [
 
 export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+
+  // Check if user is logged in (has a token)
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = localStorage.getItem("token");
+      setIsLoggedIn(!!token);
+    };
+    
+    checkAuth();
+    
+    // Re-check when route changes (e.g. after logging in)
+    window.addEventListener("storage", checkAuth);
+    return () => window.removeEventListener("storage", checkAuth);
+  }, [location]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setIsLoggedIn(false);
+    navigate("/");
+    window.location.reload();
+  };
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -21,6 +45,7 @@ export const Header = () => {
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16 md:h-20">
+          
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group">
             <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center group-hover:scale-105 transition-transform">
@@ -58,9 +83,26 @@ export const Header = () => {
               <ShoppingBag className="w-4 h-4" />
               Cart
             </Button>
-            <Button size="sm" className="bg-primary hover:bg-primary/90">
-              Shop Now
-            </Button>
+            
+            {/* Login / Logout Button */}
+            {isLoggedIn ? (
+              <Button 
+                size="sm" 
+                variant="ghost" 
+                onClick={handleLogout}
+                className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                <LogOut className="w-4 h-4" />
+                Logout
+              </Button>
+            ) : (
+              <Button size="sm" className="bg-primary hover:bg-primary/90 gap-2" asChild>
+                <Link to="/login">
+                  <User className="w-4 h-4" />
+                  Login
+                </Link>
+              </Button>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -100,9 +142,25 @@ export const Header = () => {
                   <ShoppingBag className="w-4 h-4" />
                   Cart
                 </Button>
-                <Button size="sm" className="flex-1 bg-primary hover:bg-primary/90">
-                  Shop Now
-                </Button>
+                
+                {isLoggedIn ? (
+                  <Button 
+                    size="sm" 
+                    variant="ghost" 
+                    onClick={() => { handleLogout(); setIsMenuOpen(false); }}
+                    className="flex-1 gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Logout
+                  </Button>
+                ) : (
+                  <Button size="sm" className="flex-1 bg-primary hover:bg-primary/90 gap-2" asChild>
+                    <Link to="/login" onClick={() => setIsMenuOpen(false)}>
+                      <User className="w-4 h-4" />
+                      Login
+                    </Link>
+                  </Button>
+                )}
               </div>
             </div>
           </nav>

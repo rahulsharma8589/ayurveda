@@ -8,6 +8,11 @@ import Products from "./pages/Products";
 import About from "./pages/About";
 import Ayurveda from "./pages/Ayurveda";
 import Contact from "./pages/Contact";
+import Register from "./pages/Register";
+import VerifyEmail from "./pages/VerifyEmail";
+import Login from "./pages/Login";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +29,11 @@ const App = () => (
           <Route path="/about" element={<About />} />
           <Route path="/ayurveda" element={<Ayurveda />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
