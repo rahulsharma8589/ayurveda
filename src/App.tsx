@@ -14,6 +14,8 @@ import Login from "./pages/Login";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
+import Profile from "./pages/profile";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +26,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          {/* PUBLIC ROUTES - Everyone can access these */}
           <Route path="/" element={<Index />} />
           <Route path="/products" element={<Products />} />
           <Route path="/about" element={<About />} />
@@ -34,7 +37,17 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          
+
+          {/* PROTECTED ROUTES - Only logged-in users can access these */}
+          <Route element={<ProtectedRoute />}>
+             {/* If you have a Profile or Checkout page, put them here. 
+                 Example: <Route path="/profile" element={<Profile />} /> 
+             */}
+            <Route path="/profile" element={<Profile />} />
+          </Route>
+
+          {/* CATCH-ALL */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

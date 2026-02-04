@@ -9,6 +9,7 @@ import { Mail, Lock, ArrowRight, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { z } from "zod";
+import { apiRequest } from "@/lib/api";
 
 const loginSchema = z.object({
   email: z.string().trim().email("Please enter a valid email address").max(255),
@@ -40,15 +41,33 @@ export default function Login() {
     setErrors({});
     setLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
+    // Inside Login.tsx -> handleSubmit function
+
+    try {
+      // 1. Call your actual backend - Ensure the path matches your backend route
+      const response = await apiRequest("/auth/login", { email, password });
+
+      // 2. Save the token and user metadata for the "Hi, Username" feature
+      localStorage.setItem("token", response.token);
+      localStorage.setItem("userName", response.user.name);
+      localStorage.setItem("userEmail", response.user.email);
+      
       toast({
         title: "Welcome back!",
-        description: "You have successfully logged in.",
+        description: `Namaste, ${response.user.name}. You have successfully logged in.`,
       });
-      navigate("/");
+
+      navigate("/"); // Redirect to home or dashboard
+    } catch (error: any) {
+      // Handle backend errors (e.g., "Invalid credentials" or "Email not verified")
+      toast({
+        variant: "destructive",
+        title: "Login Failed",
+        description: error.message || "Invalid email or password.",
+      });
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   return (

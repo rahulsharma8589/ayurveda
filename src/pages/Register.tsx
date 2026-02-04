@@ -9,6 +9,7 @@ import { Mail, Lock, User, ArrowRight, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { z } from "zod";
+import { apiRequest } from "@/lib/api";
 
 const registerSchema = z.object({
   name: z.string().trim().min(2, "Name must be at least 2 characters").max(100),
@@ -31,32 +32,51 @@ export default function Register() {
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    const result = registerSchema.safeParse({ name: fullName, email, password, confirmPassword });
-    if (!result.success) {
-      const fieldErrors: { email?: string; password?: string; confirmPassword?: string; name?: string } = {};
-      result.error.errors.forEach((err) => {
-        const field = err.path[0] as string;
-        fieldErrors[field as keyof typeof fieldErrors] = err.message;
-      });
-      setErrors(fieldErrors);
-      return;
-    }
-    
-    setErrors({});
-    setLoading(true);
+  e.preventDefault();
+  
+  // 1. Validate with Zod
+  const result = registerSchema.safeParse({ name: fullName, email, password, confirmPassword });
+  if (!result.success) {
+    const fieldErrors: { email?: string; password?: string; confirmPassword?: string; name?: string } = {};
+    result.error.errors.forEach((err) => {
+      const field = err.path[0] as string;
+      fieldErrors[field as keyof typeof fieldErrors] = err.message;
+    });
+    setErrors(fieldErrors);
+    return;
+  }
+  
+  setErrors({});
+  setLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      toast({
-        title: "Check your email!",
-        description: "We've sent you a verification code.",
-      });
-      navigate("/verify-email", { state: { email: email.trim() } });
-      setLoading(false);
-    }, 1000);
-  };
+  try {
+    // 2. Call the actual backend API
+    const data = await apiRequest("/register", { 
+      name: fullName, 
+      email: email.trim(), 
+      password 
+    });
+
+    // 3. Show success message from backend
+    toast({
+      title: "Registration Successful!",
+      description: data.message, // "Registered successfully. Please verify email via OTP."
+    });
+
+    // 4. Navigate to verify-email and pass the email address
+    navigate("/verify-email", { state: { email: email.trim() } });
+    
+  } catch (error: any) {
+    // 5. Handle backend errors (e.g., "Email already registered")
+    toast({
+      variant: "destructive",
+      title: "Registration Failed",
+      description: error.message,
+    });
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <AuthLayout>
