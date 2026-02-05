@@ -5,6 +5,11 @@
 @tailwind utilities;
 
 @layer base {
+  
+ 
+
+
+
   :root {
     /* Ayurvedic Nature Palette */
     --background: 45 30% 97%;

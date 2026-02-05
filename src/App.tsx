@@ -14,8 +14,9 @@ import Login from "./pages/Login";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
-import ProtectedRoute from "./components/auth/ProtectedRoute";
+import ProtectedRoute from "./components/auth/ProtectedRoute"; //
 import Profile from "./pages/profile";
+import Addresses from "./pages/Addresses"; // 1. ADD THIS IMPORT
 
 const queryClient = new QueryClient();
 
@@ -26,7 +27,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          {/* PUBLIC ROUTES - Everyone can access these */}
+          {/* PUBLIC ROUTES */}
           <Route path="/" element={<Index />} />
           <Route path="/products" element={<Products />} />
           <Route path="/about" element={<About />} />
@@ -37,14 +38,12 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
-          
 
-          {/* PROTECTED ROUTES - Only logged-in users can access these */}
+          {/* PROTECTED ROUTES - Authenticated users only */}
           <Route element={<ProtectedRoute />}>
-             {/* If you have a Profile or Checkout page, put them here. 
-                 Example: <Route path="/profile" element={<Profile />} /> 
-             */}
             <Route path="/profile" element={<Profile />} />
+            {/* 2. ADD THIS ROUTE (Ensure it is /addresses with a single 's') */}
+            <Route path="/addresses" element={<Addresses />} />
           </Route>
 
           {/* CATCH-ALL */}

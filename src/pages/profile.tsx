@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom"; // Added Link import
 import { motion } from "framer-motion";
 import { Mail, Phone, MapPin, Package, LogOut, ChevronRight, Edit2, Loader2 } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/api"; // Ensure this is your helper
+import { apiRequest } from "@/lib/api";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -17,12 +17,11 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [isEditingPhone, setIsEditingPhone] = useState(false);
   const [phoneInput, setPhoneInput] = useState("");
-
-  // 1. Fetch real user data from backend on load
+   
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const data = await apiRequest("/auth/profile", {}, "GET");
+        const data = await apiRequest("/auth/profile", null, "GET");
         setUser(data);
         setPhoneInput(data.phone || "");
       } catch (error: any) {
@@ -39,7 +38,6 @@ const Profile = () => {
     fetchProfile();
   }, []);
 
-  // 2. Save phone number to MongoDB
   const handleSavePhone = async () => {
     try {
       await apiRequest("/auth/update-profile", { phone: phoneInput }, "PUT");
@@ -56,7 +54,7 @@ const Profile = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("token"); // Clear the session
+    localStorage.removeItem("token");
     toast({ title: "Logged out successfully" });
     navigate("/login");
   };
@@ -80,17 +78,17 @@ const Profile = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
           >
-            <h1 className="text-2xl font-semibold text-foreground mb-6">
+            <h1 className="text-3xl font-serif font-bold text-primary mb-6">
               Hi, {user?.name}
             </h1>
 
-            <div className="flex items-center gap-3 py-2">
-              <Mail className="h-5 w-5 text-muted-foreground" />
-              <span className="text-foreground">{user?.email}</span>
+            <div className="flex items-center gap-3 py-3">
+              <Mail className="h-6 w-6 text-muted-foreground" />
+              <span className="text-lg text-foreground">{user?.email}</span>
             </div>
 
-            <div className="flex items-center gap-3 py-2">
-              <Phone className="h-5 w-5 text-muted-foreground" />
+            <div className="flex items-center gap-3 py-3">
+              <Phone className="h-6 w-6 text-muted-foreground" />
               {isEditingPhone ? (
                 <div className="flex items-center gap-2 flex-1">
                   <Input
@@ -98,14 +96,14 @@ const Profile = () => {
                     placeholder="Enter mobile number"
                     value={phoneInput}
                     onChange={(e) => setPhoneInput(e.target.value)}
-                    className="max-w-[200px] h-8"
+                    className="max-w-[200px] h-10 text-lg"
                   />
                   <Button size="sm" onClick={handleSavePhone}>Save</Button>
                   <Button size="sm" variant="ghost" onClick={() => setIsEditingPhone(false)}>Cancel</Button>
                 </div>
               ) : (
                 <div className="flex items-center justify-between flex-1">
-                  <span className="text-foreground">
+                  <span className="text-lg text-foreground">
                     {user?.phone || <span className="text-muted-foreground">Add mobile number</span>}
                   </span>
                   <Button 
@@ -114,45 +112,48 @@ const Profile = () => {
                     className="h-8 w-8"
                     onClick={() => setIsEditingPhone(true)}
                   >
-                    <Edit2 className="h-4 w-4 text-muted-foreground" />
+                    <Edit2 className="h-5 w-5 text-muted-foreground" />
                   </Button>
                 </div>
               )}
             </div>
 
-            <Separator className="my-4" />
+            <Separator className="my-6" />
 
-            {/* Addresses Link */}
-            <button className="flex items-center justify-between w-full py-4 hover:bg-muted/50 transition-colors rounded-lg px-1">
-              <div className="flex items-center gap-3">
-                <MapPin className="h-5 w-5 text-muted-foreground" />
-                <span className="text-foreground font-medium">Addresses</span>
+            {/* FIXED: Added Link to make navigation work */}
+            <Link 
+              to="/addresses" 
+              className="flex items-center justify-between w-full py-5 hover:bg-muted/50 transition-colors rounded-xl px-2"
+            >
+              <div className="flex items-center gap-4">
+                <MapPin className="h-6 w-6 text-primary" />
+                <span className="text-xl font-medium text-foreground">Addresses</span>
               </div>
-              <ChevronRight className="h-5 w-5 text-muted-foreground" />
-            </button>
+              <ChevronRight className="h-6 w-6 text-muted-foreground" />
+            </Link>
 
             <Separator />
 
             {/* My Orders Link */}
-            <button className="flex items-center justify-between w-full py-4 hover:bg-muted/50 transition-colors rounded-lg px-1">
-              <div className="flex items-center gap-3">
-                <Package className="h-5 w-5 text-muted-foreground" />
+            <button className="flex items-center justify-between w-full py-5 hover:bg-muted/50 transition-colors rounded-xl px-2">
+              <div className="flex items-center gap-4">
+                <Package className="h-6 w-6 text-muted-foreground" />
                 <div className="text-left">
-                  <span className="text-foreground font-medium block">My Orders</span>
+                  <span className="text-xl font-medium text-foreground block">My Orders</span>
                   <span className="text-sm text-muted-foreground">Manage your wellness journey</span>
                 </div>
               </div>
-              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+              <ChevronRight className="h-6 w-6 text-muted-foreground" />
             </button>
 
             <Separator />
 
             <button 
-              className="flex items-center gap-3 w-full py-4 mt-4"
+              className="flex items-center gap-4 w-full py-6 mt-6 hover:bg-destructive/5 rounded-xl px-2 transition-colors"
               onClick={handleLogout}
             >
-              <LogOut className="h-5 w-5 text-destructive" />
-              <span className="text-destructive font-medium">Logout</span>
+              <LogOut className="h-6 w-6 text-destructive" />
+              <span className="text-xl text-destructive font-bold">Logout</span>
             </button>
           </motion.div>
         </div>
