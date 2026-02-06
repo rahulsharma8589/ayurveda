@@ -38,20 +38,27 @@ const Profile = () => {
     fetchProfile();
   }, []);
 
-  const handleSavePhone = async () => {
-    try {
-      await apiRequest("/auth/update-profile", { phone: phoneInput }, "PUT");
-      setUser({ ...user, phone: phoneInput });
-      setIsEditingPhone(false);
-      toast({ title: "Phone number updated in database" });
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Update failed",
-        description: error.message,
-      });
-    }
-  };
+ const handleSavePhone = async () => {
+  try {
+    // ACTUAL API CALL: Send the phone number to your backend
+    const response = await apiRequest("/auth/update-profile", { phone: phoneInput }, "PUT");
+    
+    // Update local state so the UI reflects the change immediately
+    setUser({ ...user, phone: phoneInput });
+    setIsEditingPhone(false);
+    
+    toast({ 
+      title: "Profile Updated", 
+      description: "Your mobile number has been saved securely." 
+    });
+  } catch (error: any) {
+    toast({
+      variant: "destructive",
+      title: "Update Failed",
+      description: error.message || "Could not save phone number.",
+    });
+  }
+};
 
   const handleLogout = () => {
     localStorage.removeItem("token");

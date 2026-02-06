@@ -10,6 +10,8 @@ import { Mail, Lock, ArrowRight, Sparkles, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { z } from "zod";
+import { apiRequest } from "@/lib/api"; 
+
 
 const resetSchema = z.object({
   email: z.string().trim().email("Please enter a valid email address").max(255),
@@ -72,23 +74,32 @@ export default function ResetPassword() {
   };
 
   const handleResendOtp = async () => {
-    const emailResult = z.string().trim().email().safeParse(email);
-    if (!emailResult.success) {
-      setErrors({ email: "Please enter a valid email address" });
-      return;
-    }
-    
-    setResending(true);
+  const emailResult = z.string().trim().email().safeParse(email);
+  if (!emailResult.success) {
+    setErrors({ email: "Please enter a valid email address" });
+    return;
+  }
+  
+  setResending(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      toast({
-        title: "Code resent!",
-        description: "Check your email for the new reset code.",
-      });
-      setResending(false);
-    }, 1000);
-  };
+  try {
+    // Re-trigger the forgot-password flow on the backend
+    await apiRequest("/auth/forgot-password", { email: email.trim() }, "POST");
+    
+    toast({
+      title: "Code resent!",
+      description: "Check your email for the new reset code.",
+    });
+  } catch (error: any) {
+    toast({
+      variant: "destructive",
+      title: "Failed to resend",
+      description: error.message,
+    });
+  } finally {
+    setResending(false);
+  }
+};
 
   return (
     <AuthLayout>

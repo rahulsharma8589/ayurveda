@@ -9,6 +9,7 @@ import { Mail, ArrowRight, Sparkles, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { z } from "zod";
+import { apiRequest } from "@/lib/api"; // <--- Add this line!
 
 const emailSchema = z.string().trim().email("Please enter a valid email address").max(255);
 
@@ -20,27 +21,38 @@ export default function ForgotPassword() {
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    const result = emailSchema.safeParse(email);
-    if (!result.success) {
-      setEmailError(result.error.errors[0].message);
-      return;
-    }
-    
-    setEmailError("");
-    setLoading(true);
+  e.preventDefault();
+  
+  const result = emailSchema.safeParse(email);
+  if (!result.success) {
+    setEmailError(result.error.errors[0].message);
+    return;
+  }
+  
+  setEmailError("");
+  setLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      toast({
-        title: "Check your email!",
-        description: "We've sent you a password reset code.",
-      });
-      navigate("/reset-password", { state: { email: email.trim() } });
-      setLoading(false);
-    }, 1000);
-  };
+  try {
+    // ACTUAL API CALL to your backend
+    await apiRequest("/auth/forgot-password", { email: email.trim() }, "POST");
+    
+    toast({
+      title: "Check your email!",
+      description: "We've sent you a password reset code.",
+    });
+    
+    // Navigate to reset page after successful backend response
+    navigate("/reset-password", { state: { email: email.trim() } });
+  } catch (error: any) {
+    toast({
+      variant: "destructive",
+      title: "Error",
+      description: error.message || "Failed to send reset code.",
+    });
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <AuthLayout>
