@@ -24,51 +24,58 @@ export default function Login() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+ const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  
+  // 1. Validate form input using your existing Zod schema
+  const result = loginSchema.safeParse({ email, password });
+  if (!result.success) {
+    const fieldErrors: { email?: string; password?: string } = {};
+    result.error.errors.forEach((err) => {
+      const field = err.path[0] as string;
+      fieldErrors[field as keyof typeof fieldErrors] = err.message;
+    });
+    setErrors(fieldErrors);
+    return;
+  }
+  
+  setErrors({});
+  setLoading(true);
+
+  try {
+    // 2. Call your backend login endpoint
+    const response = await apiRequest("/auth/login", { email, password });
+
+    // 3. Save the authentication token and user data
+    localStorage.setItem("token", response.token);
+    localStorage.setItem("userName", response.user.name);
+    localStorage.setItem("userEmail", response.user.email);
+    localStorage.setItem("userRole", response.user.role); // Important for permission checks
     
-    const result = loginSchema.safeParse({ email, password });
-    if (!result.success) {
-      const fieldErrors: { email?: string; password?: string } = {};
-      result.error.errors.forEach((err) => {
-        const field = err.path[0] as string;
-        fieldErrors[field as keyof typeof fieldErrors] = err.message;
-      });
-      setErrors(fieldErrors);
-      return;
+    toast({
+      title: "Welcome back!",
+      description: `Namaste, ${response.user.name}. You have successfully logged in.`,
+    });
+
+    // 4. Role-based Redirection
+    if (response.user.role === "admin") {
+      // Redirect admins to the product management page
+      navigate("/products"); 
+    } else {
+      // Redirect normal users to the home page or their profile
+      navigate("/"); 
     }
-    
-    setErrors({});
-    setLoading(true);
-
-    // Inside Login.tsx -> handleSubmit function
-
-    try {
-      // 1. Call your actual backend - Ensure the path matches your backend route
-      const response = await apiRequest("/auth/login", { email, password });
-
-      // 2. Save the token and user metadata for the "Hi, Username" feature
-      localStorage.setItem("token", response.token);
-      localStorage.setItem("userName", response.user.name);
-      localStorage.setItem("userEmail", response.user.email);
-      
-      toast({
-        title: "Welcome back!",
-        description: `Namaste, ${response.user.name}. You have successfully logged in.`,
-      });
-
-      navigate("/"); // Redirect to home or dashboard
-    } catch (error: any) {
-      // Handle backend errors (e.g., "Invalid credentials" or "Email not verified")
-      toast({
-        variant: "destructive",
-        title: "Login Failed",
-        description: error.message || "Invalid email or password.",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  } catch (error: any) {
+    // 5. Handle login errors (e.g., "Invalid credentials" or "Email not verified")
+    toast({
+      variant: "destructive",
+      title: "Login Failed",
+      description: error.message || "Invalid email or password.",
+    });
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <AuthLayout>
